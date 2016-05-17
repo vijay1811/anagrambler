@@ -1,9 +1,6 @@
 package anagrambler
 
-const (
-	slabSize int = 100000
-	poolSize int = 10
-)
+const slabSize int = 100000
 
 type Node struct {
 	Words    []string
@@ -12,7 +9,7 @@ type Node struct {
 
 type slab struct {
 	head  int
-	nodes [slabSize]Node
+	nodes []*Node
 }
 
 type slabPool []*slab
@@ -20,6 +17,7 @@ type slabPool []*slab
 type Trie struct {
 	Root *Node
 	pool slabPool
+	poolHead int
 }
 
 func NewNode() *Node {
@@ -30,17 +28,43 @@ func NewNode() *Node {
 }
 
 func newSlab() *slab {
-	// The zero values of slab.head and slab.nodes are fine
-	return &slab{}
+	s := &slab{
+		head: 0,
+		nodes: make([]*Node, slabSize),
+	}
+
+	for i := 0; i < slabSize; i++ {
+		s.nodes[i] = NewNode()
+	}
+
+	return s
 }
 
 func NewTrie() *Trie {
-	trie := &Trie{
+	t := &Trie{
 		Root: NewNode(),
-		pool: make(slabPool, poolSize),
+		pool: make(slabPool, 1),
 	}
 
-	trie.pool = append(trie.pool, newSlab())
+	t.pool[0] = newSlab()
 
-	return trie
+	return t
+}
+
+
+func NextNode(t *Trie) *Node {
+	source := t.pool[t.poolHead]
+
+	// The newest slab is full. We need to make a new slab.
+	if source.head == slabSize - 1 {
+		t.pool = append(t.pool, newSlab())
+		t.poolHead += 1
+		source = t.pool[t.poolHead]
+	}
+
+	n := source.nodes[source.head]
+
+	source.head += 1
+
+	return n
 }
