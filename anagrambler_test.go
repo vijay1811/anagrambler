@@ -7,7 +7,7 @@ import (
 )
 
 func TestKnownOutput(t *testing.T) {
-	trie := anagrambler.NewNode()
+	trie := anagrambler.NewTrie()
 
 	anagrambler.LoadDict(trie, "go-dict.txt")
 
@@ -21,7 +21,7 @@ func TestKnownOutput(t *testing.T) {
 }
 
 func BenchmarkAnagrambler(b *testing.B) {
-	trie := anagrambler.NewNode()
+	trie := anagrambler.NewTrie()
 
 	anagrambler.LoadDict(trie, "go-dict.txt")
 
