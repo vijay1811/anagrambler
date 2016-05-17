@@ -13,18 +13,6 @@ func sortedLower(w string) string {
 	return strings.Join(s, "")
 }
 
-type Node struct {
-	Words    []string
-	Children map[rune]*Node
-}
-
-func NewNode() *Node {
-	return &Node{
-		Words:    make([]string, 0, 1),
-		Children: make(map[rune]*Node),
-	}
-}
-
 func LoadDict(root *Node, filepath string) {
 	data, err := ioutil.ReadFile(filepath)
 
