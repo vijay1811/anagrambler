@@ -32,12 +32,16 @@ func AddWord(trie *Trie, word string) {
 	path := trie.Root
 
 	for _, letter := range sortedLower(word) {
-		if path.Children[letter] == nil {
-			path.Children[letter] = NextNode(trie)
+		if path.getChild(letter) == nil {
+			path.setChild(letter, NextNode(trie))
 		}
-		path = path.Children[letter]
+		path = path.getChild(letter)
 	}
-	path.Words = append(path.Words, word)
+
+	// Add to the head of the linked list of anagrams
+	w := &Word{s: &word, next: path.Words}
+
+	path.Words = w
 }
 
 func Search(trie *Trie, text string, filter string) []string {
@@ -48,9 +52,9 @@ func Search(trie *Trie, text string, filter string) []string {
 	filteredResults := make([]string, 0)
 
 	for node := range results {
-		for _, word := range node.Words {
-			if strings.Contains(word, filter) {
-				filteredResults = append(filteredResults, word)
+		for word := node.Words; word != nil; word = word.next {
+			if strings.Contains(*word.s, filter) {
+				filteredResults = append(filteredResults, *word.s)
 			}
 		}
 	}
@@ -61,7 +65,7 @@ func Search(trie *Trie, text string, filter string) []string {
 func search(n *Node, text string, filter string, results map[*Node]bool) {
 	// Record any words stored at this node
 	// Only record acronyms after the filter has been satisfied
-	if filter == "" && len(n.Words) > 0 {
+	if filter == "" && n.Words != nil {
 		if !results[n] {
 			// Add this node's acronyms to the results
 			results[n] = true
@@ -77,7 +81,7 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 	for i, letter := range text {
 		// Skip any runes that we don't have nodes for
 		// or that we've already searched for (i.e. duplicate runes)
-		if n.Children[letter] == nil || searched_runes[letter] == true {
+		if n.getChild(letter) == nil || searched_runes[letter] == true {
 			continue
 		}
 
@@ -101,7 +105,7 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 			return
 		}
 
-		search(n.Children[letter], text[i+1:], new_filter, results)
+		search(n.getChild(letter), text[i+1:], new_filter, results)
 
 		searched_runes[letter] = true
 	}
