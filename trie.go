@@ -3,7 +3,7 @@ package anagrambler
 const slabSize int = 100000
 
 type Word struct {
-	s *string
+	s []byte
 	next *Word
 }
 

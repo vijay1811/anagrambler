@@ -1,16 +1,23 @@
 package anagrambler
 
 import (
+	"bytes"
 	"io/ioutil"
-	"sort"
-	"strings"
 )
 
-func sortedLower(w string) string {
-	w = strings.ToLower(w)
-	s := strings.Split(w, "")
-	sort.Strings(s)
-	return strings.Join(s, "")
+func sortedLower(word []byte) []byte {
+	sorted := bytes.ToLower(word)
+
+	for i := 0; i < len(word); i++ {
+		c := sorted[i]
+		j := i - 1
+		for ; j >= 0 && sorted[j] > c; j-- {
+			sorted[j+1] = sorted[j]
+		}
+		sorted[j+1] = c
+	}
+
+	return sorted
 }
 
 func (trie *Trie) LoadDict(filepath string) {
@@ -20,7 +27,7 @@ func (trie *Trie) LoadDict(filepath string) {
 		panic(err)
 	}
 
-	words := strings.Split(string(data), "\n")
+	words := bytes.Split(data, []byte("\n"))
 	words = words[:len(words)-1]
 
 	for _, word := range words {
@@ -28,7 +35,7 @@ func (trie *Trie) LoadDict(filepath string) {
 	}
 }
 
-func (trie *Trie) AddWord(word string) {
+func (trie *Trie) AddWord(word []byte) {
 	path := trie.Root
 
 	for _, letter := range sortedLower(word) {
@@ -39,7 +46,7 @@ func (trie *Trie) AddWord(word string) {
 	}
 
 	// Add to the head of the linked list of anagrams
-	w := &Word{s: &word, next: path.Words}
+	w := &Word{s: word, next: path.Words}
 
 	path.Words = w
 }
@@ -47,14 +54,16 @@ func (trie *Trie) AddWord(word string) {
 func (trie *Trie) Search(text string, filter string) []string {
 	results := make(map[*Node]bool)
 
-	search(trie.Root, sortedLower(text), sortedLower(filter), results)
+	t, f := []byte(text), []byte(filter)
+
+	search(trie.Root, sortedLower(t), sortedLower(f), results)
 
 	filteredResults := make([]string, 0)
 
 	for node := range results {
 		for word := node.Words; word != nil; word = word.next {
-			if strings.Contains(*word.s, filter) {
-				filteredResults = append(filteredResults, *word.s)
+			if bytes.Contains(word.s, f) {
+				filteredResults = append(filteredResults, string(word.s))
 			}
 		}
 	}
@@ -62,10 +71,10 @@ func (trie *Trie) Search(text string, filter string) []string {
 	return filteredResults
 }
 
-func search(n *Node, text string, filter string, results map[*Node]bool) {
+func search(n *Node, text []byte, filter []byte, results map[*Node]bool) {
 	// Record any words stored at this node
 	// Only record acronyms after the filter has been satisfied
-	if filter == "" && n.Words != nil {
+	if len(filter) == 0 && n.Words != nil {
 		if !results[n] {
 			// Add this node's acronyms to the results
 			results[n] = true
@@ -76,7 +85,7 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 	}
 
 	// Keep track of which runes we've searched
-	searched_runes := make(map[rune]bool)
+	searched_runes := make(map[byte]bool)
 
 	for i, letter := range text {
 		// Skip any runes that we don't have nodes for
@@ -85,20 +94,20 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 			continue
 		}
 
-		var new_filter string
+		var new_filter []byte
 
 		switch {
-		case filter == "":
+		case len(filter) == 0:
 			// The filter has already been satisfied
-			new_filter = ""
-		case letter < rune(filter[0]):
+			new_filter = filter
+		case letter < filter[0]:
 			// This letter doesn't affect the filter
-			new_filter = filter[:]
-		case letter == rune(filter[0]):
+			new_filter = filter
+		case letter == filter[0]:
 			// This letter satisfies the next rune in the filter, so we can
 			// remove it from the filter
 			new_filter = filter[1:]
-		case letter > rune(filter[0]):
+		case letter > filter[0]:
 			// The remaining letters in the text are all greater than the next
 			// required filter rune, so none of the remaining substrings will
 			// satisfy the filter
