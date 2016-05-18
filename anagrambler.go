@@ -32,10 +32,10 @@ func AddWord(trie *Trie, word string) {
 	path := trie.Root
 
 	for _, letter := range sortedLower(word) {
-		if path.getChild(letter) == nil {
-			path.setChild(letter, NextNode(trie))
+		if path.Children[letter - 'a'] == nil {
+			path.Children[letter - 'a'] = NextNode(trie)
 		}
-		path = path.getChild(letter)
+		path = path.Children[letter - 'a']
 	}
 
 	// Add to the head of the linked list of anagrams
@@ -81,7 +81,7 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 	for i, letter := range text {
 		// Skip any runes that we don't have nodes for
 		// or that we've already searched for (i.e. duplicate runes)
-		if n.getChild(letter) == nil || searched_runes[letter] == true {
+		if n.Children[letter - 'a'] == nil || searched_runes[letter] == true {
 			continue
 		}
 
@@ -105,7 +105,7 @@ func search(n *Node, text string, filter string, results map[*Node]bool) {
 			return
 		}
 
-		search(n.getChild(letter), text[i+1:], new_filter, results)
+		search(n.Children[letter - 'a'], text[i+1:], new_filter, results)
 
 		searched_runes[letter] = true
 	}
