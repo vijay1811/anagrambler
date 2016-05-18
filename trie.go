@@ -37,7 +37,7 @@ func NewTrie() *Trie {
 }
 
 
-func NextNode(t *Trie) *Node {
+func (t *Trie) NextNode() *Node {
 	source := t.pool[t.poolHead]
 
 	// The newest slab is full. We need to make a new slab.

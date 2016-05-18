@@ -13,7 +13,7 @@ func sortedLower(w string) string {
 	return strings.Join(s, "")
 }
 
-func LoadDict(trie *Trie, filepath string) {
+func (trie *Trie) LoadDict(filepath string) {
 	data, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
@@ -24,16 +24,16 @@ func LoadDict(trie *Trie, filepath string) {
 	words = words[:len(words)-1]
 
 	for _, word := range words {
-		AddWord(trie, word)
+		trie.AddWord(word)
 	}
 }
 
-func AddWord(trie *Trie, word string) {
+func (trie *Trie) AddWord(word string) {
 	path := trie.Root
 
 	for _, letter := range sortedLower(word) {
 		if path.Children[letter - 'a'] == nil {
-			path.Children[letter - 'a'] = NextNode(trie)
+			path.Children[letter - 'a'] = trie.NextNode()
 		}
 		path = path.Children[letter - 'a']
 	}
@@ -44,7 +44,7 @@ func AddWord(trie *Trie, word string) {
 	path.Words = w
 }
 
-func Search(trie *Trie, text string, filter string) []string {
+func (trie *Trie) Search(text string, filter string) []string {
 	results := make(map[*Node]bool)
 
 	search(trie.Root, sortedLower(text), sortedLower(filter), results)

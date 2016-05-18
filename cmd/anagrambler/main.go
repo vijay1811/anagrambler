@@ -10,7 +10,7 @@ import (
 func main() {
 	trie := anagrambler.NewTrie()
 
-	anagrambler.LoadDict(trie, "go-dict.txt")
+	trie.LoadDict("go-dict.txt")
 
 	if len(os.Args) > 1 {
 		searchWord := os.Args[1]
@@ -21,7 +21,7 @@ func main() {
 			filter = os.Args[2]
 		}
 
-		results := anagrambler.Search(trie, searchWord, filter)
+		results := trie.Search(searchWord, filter)
 
 		fmt.Println("Number of anagrams:", len(results))
 
