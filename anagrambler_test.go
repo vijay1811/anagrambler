@@ -9,7 +9,9 @@ import (
 func TestKnownOutput(t *testing.T) {
 	trie := anagrambler.NewTrie()
 
-	trie.LoadDict("go-dict.txt")
+	if err := trie.LoadDict("go-dict.txt"); err != nil {
+		t.Error("Could not load dictionary 'go-dict.txt'", err)
+	}
 
 	searchWord := "honorificabilitudinitatibus"
 
@@ -23,7 +25,9 @@ func TestKnownOutput(t *testing.T) {
 func BenchmarkAnagrambler(b *testing.B) {
 	trie := anagrambler.NewTrie()
 
-	trie.LoadDict("go-dict.txt")
+	if err := trie.LoadDict("go-dict.txt"); err != nil {
+		b.Error("Could not load dictionary 'go-dict.txt'", err)
+	}
 
 	searchWord := "Lopadotemachoselachogaleokranioleipsanodrimhypotrimmatosilphioparaomelitokatakechymenokichlepikossyphophattoperisteralektryonoptekephalliokigklopeleiolagoiosiraiobaphetraganopterygon"
 

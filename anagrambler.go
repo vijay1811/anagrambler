@@ -20,11 +20,11 @@ func sortedLower(word []byte) []byte {
 	return sorted
 }
 
-func (trie *Trie) LoadDict(filepath string) {
+func (trie *Trie) LoadDict(filepath string) error {
 	data, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	words := bytes.Split(data, []byte("\n"))
@@ -33,6 +33,8 @@ func (trie *Trie) LoadDict(filepath string) {
 	for _, word := range words {
 		trie.AddWord(word)
 	}
+
+	return nil
 }
 
 func (trie *Trie) AddWord(word []byte) {

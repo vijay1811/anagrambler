@@ -10,7 +10,11 @@ import (
 func main() {
 	trie := anagrambler.NewTrie()
 
-	trie.LoadDict("go-dict.txt")
+	if err := trie.LoadDict("go-dict.txt"); err != nil {
+		fmt.Printf("Could not load dictionary 'go-dict.txt'")
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	if len(os.Args) > 1 {
 		searchWord := os.Args[1]
